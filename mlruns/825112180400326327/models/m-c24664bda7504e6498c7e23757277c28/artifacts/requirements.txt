@@ -1,2 +1,0 @@
-mlflow==3.6.0
-prophet==1.2.1
