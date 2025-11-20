@@ -1,0 +1,47 @@
+artifact_path: file:///D:\Final Project\mlflow_project\mlruns/825112180400326327/models/m-e089e550b9614fb4bde1c5993dc88e3a/artifacts
+flavors:
+  prophet:
+    code: null
+    data: model.pr
+    model_type: Prophet
+    prophet_version: 1.2.1
+  python_function:
+    data: model.pr
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.prophet
+    python_version: 3.12.4
+is_signature_from_type_hint: false
+mlflow_version: 3.6.0
+model_id: m-e089e550b9614fb4bde1c5993dc88e3a
+model_size_bytes: 326065
+model_uuid: m-e089e550b9614fb4bde1c5993dc88e3a
+prompts: null
+run_id: 49dd277cf03845efb68628a62273d3df
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "datetime", "name": "ds", "required": true}, {"type": "double",
+    "name": "y", "required": true}]'
+  outputs: '[{"type": "datetime", "name": "ds", "required": true}, {"type": "double",
+    "name": "trend", "required": true}, {"type": "double", "name": "yhat_lower", "required":
+    true}, {"type": "double", "name": "yhat_upper", "required": true}, {"type": "double",
+    "name": "trend_lower", "required": true}, {"type": "double", "name": "trend_upper",
+    "required": true}, {"type": "double", "name": "multiplicative_terms", "required":
+    true}, {"type": "double", "name": "multiplicative_terms_lower", "required": true},
+    {"type": "double", "name": "multiplicative_terms_upper", "required": true}, {"type":
+    "double", "name": "weekly", "required": true}, {"type": "double", "name": "weekly_lower",
+    "required": true}, {"type": "double", "name": "weekly_upper", "required": true},
+    {"type": "double", "name": "yearly", "required": true}, {"type": "double", "name":
+    "yearly_lower", "required": true}, {"type": "double", "name": "yearly_upper",
+    "required": true}, {"type": "double", "name": "additive_terms", "required": true},
+    {"type": "double", "name": "additive_terms_lower", "required": true}, {"type":
+    "double", "name": "additive_terms_upper", "required": true}, {"type": "double",
+    "name": "yhat", "required": true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-11-12 21:53:09.467538'

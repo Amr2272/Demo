@@ -1,0 +1,10 @@
+artifact_location: file:///D:\Final Project\mlflow_project\mlruns/825112180400326327/models/m-a41d93c4852546268d2a87b64fe14bf9/artifacts
+creation_timestamp: 1762982174916
+experiment_id: '825112180400326327'
+last_updated_timestamp: 1762982175246
+model_id: m-a41d93c4852546268d2a87b64fe14bf9
+model_type: null
+name: prophet_model
+source_run_id: f17e8c0b244c465782d0ada182af77c7
+status: 2
+status_message: null

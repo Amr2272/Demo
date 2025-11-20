@@ -1,0 +1,6 @@
+artifact_location: file:///D:/Final Project/mlflow_project/mlruns/lightgbm_test
+creation_time: 1763652495449
+experiment_id: '298312331002780715'
+last_update_time: 1763652495449
+lifecycle_stage: active
+name: lightgbm_test

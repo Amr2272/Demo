@@ -1,0 +1,14 @@
+artifact_uri: file:///D:\Final Project\mlflow_project\mlruns/825112180400326327/9864c0ace3a74961a6b8c8d303dfdac1/artifacts
+end_time: 1763112040871
+entry_point_name: ''
+experiment_id: '825112180400326327'
+lifecycle_stage: active
+run_id: 9864c0ace3a74961a6b8c8d303dfdac1
+run_name: cps0.001_sps0.1_hps0.1_modeadditive
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763112040034
+status: 3
+tags: []
+user_id: MOSTAFA

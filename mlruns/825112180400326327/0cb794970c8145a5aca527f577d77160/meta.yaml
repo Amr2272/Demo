@@ -1,0 +1,14 @@
+artifact_uri: file:///D:\Final Project\mlflow_project\mlruns/825112180400326327/0cb794970c8145a5aca527f577d77160/artifacts
+end_time: 1763083634952
+entry_point_name: ''
+experiment_id: '825112180400326327'
+lifecycle_stage: active
+run_id: 0cb794970c8145a5aca527f577d77160
+run_name: efficient-turtle-201
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763083630012
+status: 3
+tags: []
+user_id: MOSTAFA

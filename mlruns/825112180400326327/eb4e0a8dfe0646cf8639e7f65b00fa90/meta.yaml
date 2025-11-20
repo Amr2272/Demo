@@ -1,0 +1,14 @@
+artifact_uri: file:///D:\Final Project\mlflow_project\mlruns/825112180400326327/eb4e0a8dfe0646cf8639e7f65b00fa90/artifacts
+end_time: 1763083359672
+entry_point_name: ''
+experiment_id: '825112180400326327'
+lifecycle_stage: active
+run_id: eb4e0a8dfe0646cf8639e7f65b00fa90
+run_name: PreTrained_Prophet_Model
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763083355882
+status: 3
+tags: []
+user_id: MOSTAFA

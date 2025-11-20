@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/Final Project/mlflow_project/mlruns/498230779184585728/aa7317951b2b4e55bd4ca85919ea33f8/artifacts
+end_time: 1763650294732
+entry_point_name: ''
+experiment_id: '498230779184585728'
+lifecycle_stage: active
+run_id: aa7317951b2b4e55bd4ca85919ea33f8
+run_name: ambitious-loon-569
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763650294625
+status: 3
+tags: []
+user_id: MOSTAFA

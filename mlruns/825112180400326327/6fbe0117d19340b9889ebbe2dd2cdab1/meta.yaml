@@ -1,0 +1,14 @@
+artifact_uri: file:///D:\Final Project\mlflow_project\mlruns/825112180400326327/6fbe0117d19340b9889ebbe2dd2cdab1/artifacts
+end_time: 1763112693099
+entry_point_name: ''
+experiment_id: '825112180400326327'
+lifecycle_stage: active
+run_id: 6fbe0117d19340b9889ebbe2dd2cdab1
+run_name: Prophet_Grid_Search
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763112692220
+status: 3
+tags: []
+user_id: MOSTAFA
