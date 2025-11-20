@@ -1,6 +1,9 @@
 [core]
     remote = origin
+    autostage = true
 ['remote "myremote"']
     url = gdrive://1Jaqf6eHVcCtnZoPOLDJRfgaAL_xAXre6
 ['remote "origin"']
     url = https://dagshub.com/Mostafa2074/my-first-repo.dvc
+    user = Mostafa2074
+    password = a6b7b45b2c43af5dd1c8804ef9094f301f00edde
