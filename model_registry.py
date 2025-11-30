@@ -1,3 +1,243 @@
+import os
+import re
+import streamlit as st
+from typing import Optional
+
+
+def _normalize_source_uri(src: str) -> str:
+    if isinstance(src, str):
+        if re.match(r"^/[A-Za-z]:/", src) or re.match(r"^/[A-Za-z]:\\", src):
+            return "file://" + src.replace("\\", "/")
+        if re.match(r"^[A-Za-z]:\\\\", src) or re.match(r"^[A-Za-z]:/", src):
+            return "file:///" + src.replace("\\", "/")
+    return src
+
+
+@st.cache_resource
+def load_production_model_from_registry(model_name: str = "BestForecastModels", stage: str = "Production"):
+    """Load a production model with multiple fallbacks.
+
+    Order:
+    1. If `MODEL_ARTIFACT_URL` secret exists, download and load it.
+    2. Try `mlflow.pyfunc.load_model("models:/...")` from Model Registry.
+    3. If that fails, attempt to download artifacts referenced by the model version.
+    4. Final fallback: scan `./artifacts/` in the repository for an MLflow model folder.
+    """
+
+    # --- 1) Secret-based URL override ---
+    try:
+        model_url = None
+        if isinstance(st.secrets, dict):
+            model_url = (
+                st.secrets.get("MODEL_ARTIFACT_URL")
+                or st.secrets.get("MODEL_URL")
+                or st.secrets.get("MODEL_ZIP_URL")
+            )
+        if model_url:
+            try:
+                import tempfile
+                import zipfile
+                import shutil
+                try:
+                    import requests
+                except Exception:
+                    st.error("Missing package 'requests'. Add it to requirements.txt and redeploy.")
+                    return None
+
+                tmpdir = tempfile.mkdtemp(prefix="model_url_")
+                dest_path = os.path.join(tmpdir, "downloaded_model")
+
+                r = requests.get(model_url, stream=True)
+                r.raise_for_status()
+
+                if model_url.lower().endswith(".zip"):
+                    zip_path = os.path.join(tmpdir, "model.zip")
+                    with open(zip_path, "wb") as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                        zip_ref.extractall(dest_path)
+
+                    candidate = None
+                    for root, dirs, files in os.walk(dest_path):
+                        if "MLmodel" in files:
+                            candidate = root
+                            break
+                    if candidate is None:
+                        candidate = dest_path
+                else:
+                    os.makedirs(dest_path, exist_ok=True)
+                    fname = os.path.join(dest_path, os.path.basename(model_url))
+                    with open(fname, "wb") as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                    candidate = dest_path
+
+                try:
+                    import mlflow
+                    import mlflow.pyfunc
+                except Exception:
+                    st.error("Missing package 'mlflow'. Add it to requirements.txt and redeploy.")
+                    return None
+
+                try:
+                    model = mlflow.pyfunc.load_model(candidate)
+                    try:
+                        shutil.rmtree(tmpdir)
+                    except Exception:
+                        pass
+                    return model
+                except Exception as e:
+                    st.warning(f"Model download from secret URL failed to load: {e}")
+            except Exception as secret_err:
+                st.warning(f"Could not download model from secret URL: {secret_err}")
+    except Exception:
+        # Non-fatal: proceed to registry-based loading
+        pass
+
+    # --- 2) Registry-based loading and fallbacks ---
+    try:
+        try:
+            from mlflow.tracking import MlflowClient
+            import mlflow
+            import mlflow.pyfunc
+            from mlflow import artifacts
+        except Exception:
+            st.error("Missing package 'mlflow'. Add it to requirements.txt and redeploy.")
+            return None
+
+        client = MlflowClient()
+        model_versions = client.search_model_versions(f"name='{model_name}'")
+        production_models = [mv for mv in model_versions if mv.current_stage == stage]
+
+        if not production_models:
+            st.warning(f"No production model found in registry for {model_name}. Checking for any staged model...")
+            if model_versions:
+                latest_version = max(model_versions, key=lambda x: int(x.version))
+                model_uri = f"models:/{model_name}/{latest_version.version}"
+                st.info(f"Using latest version {latest_version.version} (stage: {latest_version.current_stage})")
+            else:
+                st.error(f"No models found in registry for {model_name}")
+                return None
+        else:
+            latest_production = max(production_models, key=lambda x: int(x.version))
+            model_uri = f"models:/{model_name}/{latest_production.version}"
+            st.info(f"Selected model: {model_name} version {latest_production.version}")
+
+        # Debug: show model versions in sidebar
+        try:
+            dbg = st.sidebar.expander("Model Registry Debug")
+            with dbg:
+                st.write("Model versions found:")
+                for mv in model_versions:
+                    st.write({
+                        "version": mv.version,
+                        "stage": mv.current_stage,
+                        "run_id": getattr(mv, "run_id", None),
+                        "source": getattr(mv, "source", None),
+                    })
+        except Exception:
+            pass
+
+        # Try direct load from model registry URI
+        try:
+            model = mlflow.pyfunc.load_model(model_uri)
+            return model
+        except Exception as load_err:
+            st.warning(f"Direct load failed: {load_err}. Trying artifact download fallback...")
+
+            # Attempt to determine artifact source and download
+            try:
+                source = None
+                try:
+                    source = latest_production.source  # type: ignore
+                except Exception:
+                    try:
+                        source = latest_version.source  # type: ignore
+                    except Exception:
+                        if model_versions:
+                            source = model_versions[-1].source
+
+                if not source:
+                    raise RuntimeError("Could not determine model artifact source URI")
+
+                normalized = _normalize_source_uri(source)
+
+                # Debug info
+                try:
+                    dbg2 = st.sidebar.expander("Model Load Debug Info")
+                    with dbg2:
+                        st.write({
+                            "selected_model_uri": model_uri,
+                            "resolved_source": source,
+                            "normalized_source": normalized,
+                        })
+                except Exception:
+                    pass
+
+                tmpdir = None
+                try:
+                    import tempfile
+                    tmpdir = tempfile.mkdtemp(prefix="mlflow_model_")
+                    local_path = artifacts.download_artifacts(artifact_uri=normalized, dst_path=tmpdir)
+                    model = mlflow.pyfunc.load_model(local_path)
+                    return model
+                finally:
+                    if tmpdir:
+                        try:
+                            import shutil
+                            shutil.rmtree(tmpdir)
+                        except Exception:
+                            pass
+            except Exception as fallback_err:
+                st.warning(f"Artifact download fallback failed: {fallback_err}")
+
+                # Final fallback: search repo `artifacts/` folder for MLflow model
+                try:
+                    repo_artifacts_root = os.path.join(os.getcwd(), "artifacts")
+                    if os.path.exists(repo_artifacts_root):
+                        for root, dirs, files in os.walk(repo_artifacts_root):
+                            if "MLmodel" in files:
+                                try:
+                                    st.info(f"Attempting to load model from repo artifacts: {root}")
+                                    model = mlflow.pyfunc.load_model(root)
+                                    return model
+                                except Exception:
+                                    continue
+
+                    st.error("Error loading model from registry (fallbacks failed). No usable artifacts found in repo `artifacts/`.")
+                except Exception as final_err:
+                    st.error(f"Final fallback failed: {final_err}")
+                return None
+
+    except Exception as e:
+        st.error(f"Error loading model from registry: {e}")
+        return None
+
+
+def get_model_type_from_registry(model_name: str = "BestForecastModels", stage: str = "Production") -> str:
+    """Determine the model type from the registry by reading run tags."""
+    try:
+        try:
+            from mlflow.tracking import MlflowClient
+        except Exception:
+            st.error("Missing package 'mlflow'. Add it to requirements.txt and redeploy.")
+            return "unknown"
+
+        client = MlflowClient()
+        model_versions = client.search_model_versions(f"name='{model_name}'")
+        staged_models = [mv for mv in model_versions if mv.current_stage == stage]
+
+        if staged_models:
+            latest_model = max(staged_models, key=lambda x: int(x.version))
+            run_id = latest_model.run_id
+            run = client.get_run(run_id)
+            model_type = run.data.tags.get("model_type", "unknown")
+            return model_type
+        return "unknown"
+    except Exception as e:
+        st.error(f"Error determining model type: {e}")
+        return "unknown"
 import streamlit as st
 from typing import Optional
 
