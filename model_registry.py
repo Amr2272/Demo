@@ -1,7 +1,9 @@
 import streamlit as st
-import mlflow
-import mlflow.pyfunc
-from mlflow.tracking import MlflowClient
+from typing import Optional
+
+# Lazily import heavy dependencies (mlflow, requests) inside functions so
+# the app doesn't crash at import-time on Streamlit Cloud when builds fail.
+
 
 @st.cache_resource
 def load_production_model_from_registry(model_name="BestForecastModels", stage="Production"):
@@ -32,56 +34,79 @@ def load_production_model_from_registry(model_name="BestForecastModels", stage="
                     or st.secrets.get("MODEL_ZIP_URL")
                 )
             if model_url:
-                import tempfile
-                import requests
-                import os
-                import zipfile
-                import shutil
-
-                tmpdir = tempfile.mkdtemp(prefix="model_url_")
-                dest_path = os.path.join(tmpdir, "downloaded_model")
-
-                r = requests.get(model_url, stream=True)
-                r.raise_for_status()
-
-                if model_url.lower().endswith(".zip"):
-                    zip_path = os.path.join(tmpdir, "model.zip")
-                    with open(zip_path, "wb") as f:
-                        for chunk in r.iter_content(chunk_size=8192):
-                            f.write(chunk)
-                    with zipfile.ZipFile(zip_path, "r") as zip_ref:
-                        zip_ref.extractall(dest_path)
-
-                    candidate = None
-                    for root, dirs, files in os.walk(dest_path):
-                        if "MLmodel" in files:
-                            candidate = root
-                            break
-                    if candidate is None:
-                        candidate = dest_path
-                else:
-                    os.makedirs(dest_path, exist_ok=True)
-                    fname = os.path.join(dest_path, os.path.basename(model_url))
-                    with open(fname, "wb") as f:
-                        for chunk in r.iter_content(chunk_size=8192):
-                            f.write(chunk)
-                    candidate = dest_path
-
                 try:
-                    model = mlflow.pyfunc.load_model(candidate)
+                    import tempfile
+                    import os
+                    import zipfile
+                    import shutil
+
+                    # requests may not be available at import time; import lazily
                     try:
-                        shutil.rmtree(tmpdir)
+                        import requests
+                    except Exception as e:
+                        st.error("Required package 'requests' is not installed in the deployment. Add 'requests' to requirements.txt and redeploy.")
+                        return None
+
+                    tmpdir = tempfile.mkdtemp(prefix="model_url_")
+                    dest_path = os.path.join(tmpdir, "downloaded_model")
+
+                    r = requests.get(model_url, stream=True)
+                    r.raise_for_status()
+
+                    if model_url.lower().endswith(".zip"):
+                        zip_path = os.path.join(tmpdir, "model.zip")
+                        with open(zip_path, "wb") as f:
+                            for chunk in r.iter_content(chunk_size=8192):
+                                f.write(chunk)
+                        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                            zip_ref.extractall(dest_path)
+
+                        candidate = None
+                        for root, dirs, files in os.walk(dest_path):
+                            if "MLmodel" in files:
+                                candidate = root
+                                break
+                        if candidate is None:
+                            candidate = dest_path
+                    else:
+                        os.makedirs(dest_path, exist_ok=True)
+                        fname = os.path.join(dest_path, os.path.basename(model_url))
+                        with open(fname, "wb") as f:
+                            for chunk in r.iter_content(chunk_size=8192):
+                                f.write(chunk)
+                        candidate = dest_path
+
+                    # mlflow may not be installed in the cloud. Import lazily and handle errors.
+                    try:
+                        import mlflow
+                        import mlflow.pyfunc
                     except Exception:
-                        pass
-                    return model
-                except Exception as e:
-                    st.warning(f"Model download from secret URL failed to load: {e}")
+                        st.error("Required package 'mlflow' is not installed in the deployment. Add 'mlflow' to requirements.txt and redeploy.")
+                        return None
+
+                    try:
+                        model = mlflow.pyfunc.load_model(candidate)
+                        try:
+                            shutil.rmtree(tmpdir)
+                        except Exception:
+                            pass
+                        return model
+                    except Exception as e:
+                        st.warning(f"Model download from secret URL failed to load: {e}")
         except Exception:
             # Non-fatal: proceed to registry logic
             pass
 
         # 2) Registry-based loading
         try:
+            try:
+                from mlflow.tracking import MlflowClient
+                import mlflow
+                import mlflow.pyfunc
+            except Exception:
+                st.error("Required package 'mlflow' is not installed in the deployment. Add 'mlflow' to requirements.txt and redeploy.")
+                return None
+
             client = MlflowClient()
 
             # Get the latest production model version
