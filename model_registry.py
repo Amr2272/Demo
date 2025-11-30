@@ -29,10 +29,67 @@ def load_production_model_from_registry(model_name="BestForecastModels", stage="
             model_uri = f"models:/{model_name}/{latest_production.version}"
             st.success(f"Loaded production model: {model_name} version {latest_production.version}")
         
-        # Load the model
-        model = mlflow.pyfunc.load_model(model_uri)
-        return model
-        
+        # Try loading the model directly (preferred)
+        try:
+            model = mlflow.pyfunc.load_model(model_uri)
+            return model
+        except Exception as load_err:
+            # Fallback: try to download artifacts and load from local copy.
+            st.warning(f"Direct load failed: {load_err}. Trying artifact download fallback...")
+
+            try:
+                import tempfile
+                import shutil
+                import re
+                from mlflow import artifacts
+
+                # Determine the source path for the model version (use latest_production or latest_version)
+                source = None
+                try:
+                    # If we selected a production version earlier
+                    source = latest_production.source  # type: ignore
+                except Exception:
+                    try:
+                        source = latest_version.source  # type: ignore
+                    except Exception:
+                        # Last-resort: try to inspect model_versions list
+                        if model_versions:
+                            source = model_versions[-1].source
+
+                if not source:
+                    raise RuntimeError("Could not determine model artifact source URI")
+
+                # Normalize Windows-style absolute paths to file:// URI if necessary
+                def _normalize_source_uri(src):
+                    if isinstance(src, str):
+                        # Handle leading '/D:/' style (seen when MLflow stores absolute Windows paths)
+                        if re.match(r"^/[A-Za-z]:/", src) or re.match(r"^/[A-Za-z]:\\", src):
+                            return "file://" + src.replace('\\\\', '/')
+                        # Handle 'D:\\path' or 'D:/path'
+                        if re.match(r"^[A-Za-z]:\\\\", src) or re.match(r"^[A-Za-z]:/", src):
+                            return "file:///" + src.replace('\\\\', '/')
+                    return src
+
+                normalized = _normalize_source_uri(source)
+
+                tmpdir = tempfile.mkdtemp(prefix="mlflow_model_")
+                # download_artifacts accepts artifact_uri pointing to local file:// or remote locations
+                local_path = artifacts.download_artifacts(artifact_uri=normalized, dst_path=tmpdir)
+
+                # Load the model from the downloaded local path
+                model = mlflow.pyfunc.load_model(local_path)
+
+                # Clean up downloaded files when the process exits (keep during session)
+                try:
+                    shutil.rmtree(tmpdir)
+                except Exception:
+                    pass
+
+                return model
+            except Exception as fallback_err:
+                st.error(f"Error loading model from registry (fallback failed): {fallback_err}")
+                return None
+
     except Exception as e:
         st.error(f"Error loading model from registry: {e}")
         return None
