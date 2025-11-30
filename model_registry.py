@@ -29,6 +29,22 @@ def load_production_model_from_registry(model_name="BestForecastModels", stage="
             model_uri = f"models:/{model_name}/{latest_production.version}"
             st.success(f"Loaded production model: {model_name} version {latest_production.version}")
         
+        # Debug: show model version info in sidebar for troubleshooting
+        try:
+            expander = st.sidebar.expander("Model Registry Debug")
+            with expander:
+                st.write("Model versions found:")
+                for mv in model_versions:
+                    st.write({
+                        "version": mv.version,
+                        "stage": mv.current_stage,
+                        "run_id": getattr(mv, 'run_id', None),
+                        "source": getattr(mv, 'source', None)
+                    })
+        except Exception:
+            # Non-critical if sidebar isn't available
+            pass
+
         # Try loading the model directly (preferred)
         try:
             model = mlflow.pyfunc.load_model(model_uri)
@@ -72,6 +88,18 @@ def load_production_model_from_registry(model_name="BestForecastModels", stage="
 
                 normalized = _normalize_source_uri(source)
 
+                # Debug info in sidebar
+                try:
+                    dbg = st.sidebar.expander("Model Load Debug Info")
+                    with dbg:
+                        st.write({
+                            "selected_model_uri": model_uri,
+                            "resolved_source": source,
+                            "normalized_source": normalized
+                        })
+                except Exception:
+                    pass
+
                 tmpdir = tempfile.mkdtemp(prefix="mlflow_model_")
                 # download_artifacts accepts artifact_uri pointing to local file:// or remote locations
                 local_path = artifacts.download_artifacts(artifact_uri=normalized, dst_path=tmpdir)
@@ -86,8 +114,29 @@ def load_production_model_from_registry(model_name="BestForecastModels", stage="
                     pass
 
                 return model
-            except Exception as fallback_err:
-                st.error(f"Error loading model from registry (fallback failed): {fallback_err}")
+                except Exception as fallback_err:
+                st.warning(f"Artifact download fallback failed: {fallback_err}")
+
+                # FINAL FALLBACK: try loading model from repository `artifacts/` folder.
+                try:
+                    import os
+
+                    repo_artifacts_root = os.path.join(os.getcwd(), "artifacts")
+                    if os.path.exists(repo_artifacts_root):
+                        # Look for MLflow model folders (contain MLmodel file)
+                        for root, dirs, files in os.walk(repo_artifacts_root):
+                            if "MLmodel" in files:
+                                try:
+                                    st.info(f"Attempting to load model from repo artifacts: {root}")
+                                    model = mlflow.pyfunc.load_model(root)
+                                    return model
+                                except Exception:
+                                    # try next candidate
+                                    continue
+
+                    st.error("Error loading model from registry (fallbacks failed). No usable artifacts found in repo `artifacts/`.")
+                except Exception as final_err:
+                    st.error(f"Final fallback failed: {final_err}")
                 return None
 
     except Exception as e:
