@@ -1,0 +1,10 @@
+artifact_location: file:///D:/Live%20Demo/mlruns/187419769274806512/models/m-b6a1c7c1191a41c4b5cbcf99d71840d8/artifacts
+creation_timestamp: 1764464257676
+experiment_id: '187419769274806512'
+last_updated_timestamp: 1764464264592
+model_id: m-b6a1c7c1191a41c4b5cbcf99d71840d8
+model_type: null
+name: prophet_model
+source_run_id: 91ffebb032c348f58c682b7ccaeffe0d
+status: 2
+status_message: null

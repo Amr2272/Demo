@@ -1,0 +1,30 @@
+artifact_path: file:///D:/Final Project/mlruns/2/models/m-28fb7e503c564852bec9ce0eac2525bb/artifacts
+flavors:
+  python_function:
+    cloudpickle_version: 3.1.2
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.13.2
+    streamable: false
+is_signature_from_type_hint: false
+mlflow_version: 3.6.0
+model_id: m-28fb7e503c564852bec9ce0eac2525bb
+model_size_bytes: 128993
+model_uuid: m-28fb7e503c564852bec9ce0eac2525bb
+prompts: null
+run_id: 1706c7eb622942e6813b1efccea4c4db
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "datetime", "name": "ds", "required": true}]'
+  outputs: '[{"type": "double", "name": "yhat", "required": true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-11-29 23:32:22.706890'

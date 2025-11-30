@@ -14,10 +14,10 @@ st.set_page_config(page_title="ARIMA Trainer", layout="wide")
 st.title("📊 ARIMA Trainer with MLflow, DVC & Model Registry")
 
 # Paths and DVC
-dataset_dvc = r"D:\Final Project\mlflow_project\data\model_dataset.csv.dvc"
+dataset_dvc = r"D:\Final Project\model_dataset.csv.dvc"
 arima_model_dvc = r"D:\Final Project\mlflow_project\models\models.dvc"
 dataset_path = os.path.splitext(dataset_dvc)[0]
-arima_model_path = r"D:\Final Project\mlflow_project\models\models_arima\arima_model.pkl"
+arima_model_path = r"D:\Final Project\mlflow_project\models\arima_model.pkl"
 
 mlflow_db_uri = "sqlite:///D:/Final_Project/mlflow_project/mlflow.db"
 mlflow_artifact_root = "file:///D:/Final_Project/mlflow_project/mlruns"

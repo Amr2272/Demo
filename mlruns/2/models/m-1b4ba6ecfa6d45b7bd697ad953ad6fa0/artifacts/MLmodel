@@ -1,0 +1,34 @@
+artifact_path: file:///D:/Final Project/mlruns/2/models/m-1b4ba6ecfa6d45b7bd697ad953ad6fa0/artifacts
+flavors:
+  python_function:
+    cloudpickle_version: 3.1.2
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.12.4
+    streamable: false
+is_signature_from_type_hint: false
+mlflow_version: 3.6.0
+model_id: m-1b4ba6ecfa6d45b7bd697ad953ad6fa0
+model_size_bytes: 459898
+model_uuid: m-1b4ba6ecfa6d45b7bd697ad953ad6fa0
+prompts: null
+run_id: 0009ef3cacc4499798dd6bdd2ddcd54a
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "integer", "name": "year", "required": true}, {"type": "integer",
+    "name": "month", "required": true}, {"type": "integer", "name": "day", "required":
+    true}, {"type": "integer", "name": "dayofweek", "required": true}, {"type": "integer",
+    "name": "quarter", "required": true}, {"type": "integer", "name": "dayofyear",
+    "required": true}, {"type": "long", "name": "weekofyear", "required": true}]'
+  outputs: '[{"type": "double", "name": "prediction", "required": true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-11-27 17:26:31.615489'

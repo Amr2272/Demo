@@ -1,0 +1,32 @@
+artifact_path: file:///D:/Final Project/mlruns/2/models/m-49c381dfa0d44415bdbd309e6491be8f/artifacts
+flavors:
+  python_function:
+    cloudpickle_version: 3.1.2
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.12.4
+    streamable: false
+is_signature_from_type_hint: false
+mlflow_version: 3.6.0
+model_id: m-49c381dfa0d44415bdbd309e6491be8f
+model_size_bytes: 3136606
+model_uuid: m-49c381dfa0d44415bdbd309e6491be8f
+prompts: null
+run_id: e822c7e2676b43f28afc2cff0bac218e
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "datetime", "name": "ds", "required": true}, {"type": "integer",
+    "name": "year", "required": true}, {"type": "integer", "name": "month", "required":
+    true}, {"type": "integer", "name": "day", "required": true}]'
+  outputs: '[{"type": "double", "name": "predicted_mean", "required": true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-11-28 12:27:09.745472'

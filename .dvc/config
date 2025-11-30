@@ -1,4 +1,5 @@
 [core]
     remote = origin
-['remote "origin"']
+[remote "origin"]
     url = https://dagshub.com/Mostafa2074/my-first-repo.dvc
+    auth = basic

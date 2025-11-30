@@ -16,7 +16,7 @@ st.set_page_config(page_title="Prophet Forecast Trainer", layout="wide")
 st.title("📊 Prophet Forecast Trainer with MLflow, DVC & Model Registry")
 
 # Paths and DVC
-dataset_dvc = r"D:\Final Project\mlflow_project\data\model_dataset.csv.dvc"
+dataset_dvc = r"D:\Final Project\model_dataset.csv.dvc"
 prophet_model_dvc = r"D:\Final Project\mlflow_project\models\models.dvc"
 dataset_path = os.path.splitext(dataset_dvc)[0]
 prophet_model_path = r"D:\Final Project\mlflow_project\models\models\prophet_tuned_model.pkl"
@@ -95,8 +95,8 @@ param_grid = {
     "seasonality_prior_scale": [0.1],
     "holidays_prior_scale": [0.1],
     "seasonality_mode": ["additive"],
-    "yearly_seasonality": [True],
-    "weekly_seasonality": [True]
+    "yearly_seasonality": [True, False],
+    "weekly_seasonality": [True, False]
 }
 
 if st.button("Start Grid Search"):

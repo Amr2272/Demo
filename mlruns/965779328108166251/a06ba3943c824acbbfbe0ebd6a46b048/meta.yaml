@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/Live%20Demo/mlruns/965779328108166251/a06ba3943c824acbbfbe0ebd6a46b048/artifacts
+end_time: 1764464256218
+entry_point_name: ''
+experiment_id: '965779328108166251'
+lifecycle_stage: active
+run_id: a06ba3943c824acbbfbe0ebd6a46b048
+run_name: Prophet_cps0.001_sps0.1_hps0.1_modeadditive
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764464255524
+status: 3
+tags: []
+user_id: Amr

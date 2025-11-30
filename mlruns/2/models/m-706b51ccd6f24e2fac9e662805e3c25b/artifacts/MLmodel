@@ -1,0 +1,30 @@
+artifact_path: file:///D:/Final Project/mlruns/2/models/m-706b51ccd6f24e2fac9e662805e3c25b/artifacts
+flavors:
+  python_function:
+    cloudpickle_version: 3.1.2
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.12.4
+    streamable: false
+is_signature_from_type_hint: false
+mlflow_version: 3.6.0
+model_id: m-706b51ccd6f24e2fac9e662805e3c25b
+model_size_bytes: 3135869
+model_uuid: m-706b51ccd6f24e2fac9e662805e3c25b
+prompts: null
+run_id: f642c9aa338a4c4d9ac8042ea56cf6a1
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "double", "name": "sales", "required": true}]'
+  outputs: '[{"type": "double", "name": "predicted_mean", "required": true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-11-27 14:35:13.324593'

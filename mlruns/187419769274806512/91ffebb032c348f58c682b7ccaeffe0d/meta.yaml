@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/Live%20Demo/mlruns/187419769274806512/91ffebb032c348f58c682b7ccaeffe0d/artifacts
+end_time: 1764464264844
+entry_point_name: ''
+experiment_id: '187419769274806512'
+lifecycle_stage: active
+run_id: 91ffebb032c348f58c682b7ccaeffe0d
+run_name: Best_Prophet_Model
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764464257508
+status: 3
+tags: []
+user_id: Amr
